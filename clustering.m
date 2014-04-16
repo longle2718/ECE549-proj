@@ -7,7 +7,7 @@ alphaList = [0.18 0.06 0.1 0.06 0.09 0.2 0.18 0.1];
 
 alpha = alphaList(4);
 thres = thresList(4);
-scale = [1 2 3 4 5 10]/sqrt(2)
+scale = [1 2 3 4 5 10]/sqrt(2);
 
 vid = VideoReader('charade.mp4');
 imgs = cell(1);
