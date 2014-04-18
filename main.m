@@ -35,7 +35,6 @@ d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
 for k = 1:nFrame
     im{k} = single(rgb2gray(img{k})); % Shouldn't use imshow to display this
-    %[f{k}, d{k}] = vl_sift(im{k}, 'FirstOctave', 1, 'PeakThresh', 9, 'EdgeThresh', 20);
     [f{k}, d{k}] = vl_covdet(im{k}, 'EstimateOrientation', true, 'EstimateAffineShape', true, 'PeakThreshold', 5, 'EdgeThreshold', 5);
     [~, p{k}] = vl_covdet(im{k}, 'EstimateOrientation', true, 'EstimateAffineShape', true, 'PeakThreshold', 5, 'EdgeThreshold', 5, 'descriptor', 'Patch');
     
