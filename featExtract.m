@@ -1,4 +1,4 @@
-function [d, p, f] = featExtract(img, blobSizeThresh)
+function [d, p, f] = featExtract(img, blobSizeThresh, isshow)
 % Feature extraction using vl_covdet with blob size 'adjustment'
 %
 % Input
@@ -32,8 +32,9 @@ d(:, suppress) = [];
 p(:, suppress) = [];
 
 % Display
-%{
-figure; imshow(img);
-h = vl_plotframe(f);
-set(h,'color','y','linewidth',2);
-%}
+if isshow
+    figure; imshow(img);
+    h = vl_plotframe(f);
+    set(h,'color','y','linewidth',2);
+    title(sprintf('Total %d blobs', size(f, 2)))
+end

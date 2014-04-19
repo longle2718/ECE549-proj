@@ -32,7 +32,7 @@ blobSizeThresh = 10;
 d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
 for k = 1:nFrame
-    [d{k}, p{k}] = featExtract(img{k}, blobSizeThresh);
+    [d{k}, p{k}] = featExtract(img{k}, blobSizeThresh, false);
 end
 
 %% Clustering to find visual dictionary
@@ -54,12 +54,12 @@ end
 % Debugging
 figure; hist(double(A), K);
 
-% Visual words/dictionary
-vwordD = cell(1, K);
-vwordP = cell(1, K);
+% Form visual dictionary
+vdictD = cell(1, K);
+vdictP = cell(1, K);
 for k = 1:K
-    vwordD{k} = D(:, A == k);
-    vwordP{k} = P(:, A == k);
+    vdictD{k} = D(:, A == k);
+    vdictP{k} = P(:, A == k);
 end
 % Debugging
 %{
@@ -70,12 +70,24 @@ for k = 1:size(vwordP{15}, 2)
 end
 %}
 
-%% Compute frequency vector for all the frame
+% Compute frequency vector for all training frame
+freqVec = zeros(nFrame, K);
+for k = 1:nFrame
+    distMat = vl_alldist2(d{k}, C);
+    [~, idx] = min(distMat, [], 2);
+    freqVec(k,:) = hist(idx, K);
+end
+
+%% Compute frequency vector for all test frame
 % Extract features from a test image
 file = dir(fullfile('imTest', '*.jpg'));
 imgTest = imread(fullfile('imTest', file.name));
-[dTest, pTest] = featExtract(imgTest, blobSizeThresh);
+[dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
 
 % Compute distance between sift descriptor using L2 norm
-freqVec = zeros(1, K);
 distMat = vl_alldist2(dTest, C);
+[~, idx] = min(distMat, [], 2);
+freqVecTest = hist(idx, K);
+
+% Find the most similar image from the training dataset
+score = vl_alldist2(freqVecTest', freqVec', 'HELL');
