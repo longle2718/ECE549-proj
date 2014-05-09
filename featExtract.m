@@ -18,7 +18,7 @@ im = single(rgb2gray(img)); % Shouldn't use imshow to display this
 
 % Screen out too small blobs
 suppress = false(1, size(f, 2));
-uf = zeros(5, size(f, 2)); % unoriented frame
+%uf = zeros(5, size(f, 2)); % unoriented frame
 for l = 1:size(f, 2)
     tmp = f(:,l);
     A = [tmp(3) tmp(5); tmp(4) tmp(6)];
@@ -29,11 +29,10 @@ for l = 1:size(f, 2)
         suppress(l) = true;
     end
     % xform from oriented to nonoriented ellipse
-    S = A*A';
-    uf(:,l) = [f(1:2,l); S(1,1) ; S(1,2) ; S(2,2)];
+    %S = A*A';
+    %uf(:,l) = [f(1:2,l); S(1,1) ; S(1,2) ; S(2,2)];
 end
-f = uf;
-
+%f = uf;
 f(:, suppress) = [];
 d(:, suppress) = [];
 p(:, suppress) = [];
