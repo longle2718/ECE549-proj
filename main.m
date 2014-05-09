@@ -29,8 +29,8 @@ end
 
 %% Tracking using correlation
 trackIdx = 0;
-dcumTrack = zeros(128, 0);
-dnumTrack = zeros(1,0);
+%dcumTrack = zeros(128, 0);
+%dnumTrack = zeros(1,0);
 track = cell(size(d));
 track{1} = zeros(1, size(d{1}, 2));
 for k = 1:nFrame-1
@@ -45,14 +45,14 @@ for k = 1:nFrame-1
             track{k}(idx1(l)) = trackIdx;
             track{k+1}(idx2(l)) = trackIdx;
             
-            dcumTrack(:,trackIdx) = d{k}(:, idx1(l)) + d{k+1}(:, idx2(l));
-            dnumTrack(trackIdx) = 2;
+            %dcumTrack(:,trackIdx) = d{k}(:, idx1(l)) + d{k+1}(:, idx2(l));
+            %dnumTrack(trackIdx) = 2;
         else
             % Continue a track
             track{k+1}(idx2(l)) = track{k}(idx1(l));
             
-            dcumTrack(:, track{k}(idx1(l))) = dcumTrack(:, track{k}(idx1(l))) + d{k+1}(:, idx2(l));
-            dnumTrack(track{k}(idx1(l))) = dnumTrack(track{k}(idx1(l))) + 1;
+            %dcumTrack(:, track{k}(idx1(l))) = dcumTrack(:, track{k}(idx1(l))) + d{k+1}(:, idx2(l));
+            %dnumTrack(track{k}(idx1(l))) = dnumTrack(track{k}(idx1(l))) + 1;
         end
     end
 end
@@ -72,23 +72,32 @@ for l = 1:numel(idx2)
 end
 %}
 D = cell2mat(d);
-P = cell2mat(p);
+%P = cell2mat(p);
 TRACK = cell2mat(track);
 
+% Reduce the size of descriptors
+D1 = D(:,TRACK == 0);
+D2 = zeros(size(D,1), trackIdx);
+for k = 1:trackIdx
+    D2(:, k) = mean(D(:,TRACK == k), 2);
+end
+D = [D1 D2];
+
+% Find correlation matrix
+SIG = cov(D');
 %% Clustering to find visual dictionary
 K = 32;
-for k = 1:nFrame
-    [C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10);
-end
+[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10);
+
 
 % Form visual dictionary
 vdictD = cell(1, K);
-vdictP = cell(1, K);
+%vdictP = cell(1, K);
 for k = 1:K
     vdictD{k} = D(:, A == k);
-    vdictP{k} = P(:, A == k);
+    %vdictP{k} = P(:, A == k);
 end
-save vdict.mat vdictD vdictP
+%save vdict.mat vdictD vdictP
 
 % Debugging
 %{
