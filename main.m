@@ -25,9 +25,12 @@ f = cell(1, nFrame); % frame
 for k = 1:nFrame
     [d{k}, p{k}, f{k}] = featExtract(img{k}, blobSizeThresh, false);
 end
+%featExtract(img{k}, blobSizeThresh, true);
 
 %% Tracking using correlation
 trackIdx = 0;
+dcumTrack = zeros(128, 0);
+dnumTrack = zeros(1,0);
 track = cell(size(d));
 track{1} = zeros(1, size(d{1}, 2));
 for k = 1:nFrame-1
@@ -41,8 +44,15 @@ for k = 1:nFrame-1
             trackIdx = trackIdx + 1;
             track{k}(idx1(l)) = trackIdx;
             track{k+1}(idx2(l)) = trackIdx;
+            
+            dcumTrack(:,trackIdx) = d{k}(:, idx1(l)) + d{k+1}(:, idx2(l));
+            dnumTrack(trackIdx) = 2;
         else
+            % Continue a track
             track{k+1}(idx2(l)) = track{k}(idx1(l));
+            
+            dcumTrack(:, track{k}(idx1(l))) = dcumTrack(:, track{k}(idx1(l))) + d{k+1}(:, idx2(l));
+            dnumTrack(track{k}(idx1(l))) = dnumTrack(track{k}(idx1(l))) + 1;
         end
     end
 end
@@ -62,8 +72,8 @@ for l = 1:numel(idx2)
 end
 %}
 D = cell2mat(d);
-P = cell2mat(p); 
-ndesc = size(D, 2); % total number of descriptors.
+P = cell2mat(p);
+TRACK = cell2mat(track);
 
 %% Clustering to find visual dictionary
 K = 32;
