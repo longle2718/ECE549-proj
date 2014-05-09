@@ -26,48 +26,22 @@ for k = 1:nFrame
     [d{k}, p{k}, f{k}] = featExtract(img{k}, blobSizeThresh, false);
 end
 
-%% Noncorrelated suppression
-suppress = cell(nFrame, 1);
-for k = 1:nFrame
-    suppress{k} = false(1, size(d{k}, 2));
-    if k == 1
-        R = corr(d{k}, d{k+1});
-        for l = 1:size(R,1)
-            if sum(R(l,:) > 0.9) == 0
-                suppress{k}(l) = true;
-            end
-        end
-    elseif k == nFrame
-        R = corr(d{k}, d{k-1});
-        for l = 1:size(R,1)
-            if sum(R(l,:) > 0.9) == 0
-                suppress{k}(l) = true;
-            end
-        end
-    else
-        tmpL = false(1, size(d{k}, 2));
-        RL = corr(d{k}, d{k-1});
-        for l = 1:size(RL,1)
-            if sum(RL(l,:) > 0.9) == 0 
-                tmpL(l) = true;
-            end
-        end
-        
-        tmpR = false(1, size(d{k}, 2));
-        RR = corr(d{k}, d{k+1});
-        for l = 1:size(RR,1)
-            if sum(RR(l,:) > 0.9) == 0
-                tmpR(l) = true;
-            end
-        end
-        
-        suppress{k} = tmpL | tmpR;
+%% Tracking using correlation
+trackIdx = 0;
+track = cell(0);
+for k = 1:nFrame-1
+    R = corr(d{k}, d{k+1});
+    [idx1, idx2] = ind2sub(size(R), find(R>0.8));
+    % Debugging
+    figure;
+    subplot(211); imshow(img{k}); hold on; 
+    for l = 1:numel(idx1)
+         text(f{k}(1,idx1(l)), f{k}(2,idx1(l)), num2str(l), 'color', 'y')
     end
-end
-% Apply suppression
-for k = 1:nFrame
-    d{k}(:,suppress{k} == true) = [];
-    p{k}(:,suppress{k} == true) = [];
+    subplot(212); imshow(img{k+1}); hold on;
+    for l = 1:numel(idx2)
+         text(f{k+1}(1,idx2(l)), f{k+1}(2,idx2(l)), num2str(l), 'color', 'y')
+    end
 end
 
 D = cell2mat(d);
