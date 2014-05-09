@@ -84,11 +84,11 @@ end
 D = [D1 D2];
 
 % Find correlation matrix
-SIG = cov(D');
+%SIG = cov(D');
 %% Clustering to find visual dictionary
-K = 32;
-[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10);
-
+K = 2^6;
+[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
+%dist2 = mahal(D', D');
 
 % Form visual dictionary
 vdictD = cell(1, K);
@@ -110,13 +110,19 @@ end
 %}
 
 %% Compute frequency vectors for all training frames
-freqVec = zeros(nFrame, K);
+cntVec = zeros(nFrame, K);
 for k = 1:nFrame
-    distMat = vl_alldist2(d{k}, C);
+    distMat = vl_alldist2(d{k}, C); % L2 distance
     [~, idx] = min(distMat, [], 2);
-    freqVec(k,:) = hist(idx, K);
+    cntVec(k,:) = hist(idx, K);
 end
-save freqVec.mat freqVec
+% Create weighted word frequencies
+wFreqVec = zeros(size(cntVec));
+for k = 1:nFrame
+    wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./sum(cntVec));
+end
+
+%save freqVec.mat freqVec
 
 %% Compute frequency vector for a test frame
 % Extract features from a test image
@@ -127,12 +133,14 @@ imgTest = imread(fullfile('imTest', file(2).name));
 % Compute distance between sift descriptor using L2 norm
 distMat = vl_alldist2(dTest, C);
 [~, idx] = min(distMat, [], 2);
-freqVecTest = hist(idx, K);
+cntVecTest = hist(idx, K);
+wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./sum(cntVec));
+
 xlabel('Visual word');
 ylabel('Count');
 
 % Find the most similar image from the training dataset
-score = vl_alldist2(freqVecTest', freqVec', 'HELL');
+score = vl_alldist2(cntVecTest', cntVec', 'HELL'); % Hellinger distance for probability measures
 [sortScore, frameIdx] = sort(score);
 
 % Display the top N most similar images
