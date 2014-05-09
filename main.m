@@ -28,22 +28,39 @@ end
 
 %% Tracking using correlation
 trackIdx = 0;
-track = cell(0);
+track = cell(size(d));
+track{1} = zeros(1, size(d{1}, 2));
 for k = 1:nFrame-1
+    track{k+1} = zeros(1, size(d{k+1}, 2));
+    
     R = corr(d{k}, d{k+1});
     [idx1, idx2] = ind2sub(size(R), find(R>0.8));
-    % Debugging
-    figure;
-    subplot(211); imshow(img{k}); hold on; 
     for l = 1:numel(idx1)
-         text(f{k}(1,idx1(l)), f{k}(2,idx1(l)), num2str(l), 'color', 'y')
-    end
-    subplot(212); imshow(img{k+1}); hold on;
-    for l = 1:numel(idx2)
-         text(f{k+1}(1,idx2(l)), f{k+1}(2,idx2(l)), num2str(l), 'color', 'y')
+        if track{k}(idx1(l)) == 0
+            % Create a new track
+            trackIdx = trackIdx + 1;
+            track{k}(idx1(l)) = trackIdx;
+            track{k+1}(idx2(l)) = trackIdx;
+        else
+            track{k+1}(idx2(l)) = track{k}(idx1(l));
+        end
     end
 end
 
+% Debugging
+%{
+R = corr(d{k}, d{k+1});
+[idx1, idx2] = ind2sub(size(R), find(R>0.8));
+figure;
+subplot(211); imshow(img{k}); hold on; 
+for l = 1:numel(idx1)
+     text(f{k}(1,idx1(l)), f{k}(2,idx1(l)), num2str(track{k}(idx1(l))), 'color', 'y')
+end
+subplot(212); imshow(img{k+1}); hold on;
+for l = 1:numel(idx2)
+     text(f{k+1}(1,idx2(l)), f{k+1}(2,idx2(l)), num2str(track{k+1}(idx2(l))), 'color', 'y')
+end
+%}
 D = cell2mat(d);
 P = cell2mat(p); 
 ndesc = size(D, 2); % total number of descriptors.
