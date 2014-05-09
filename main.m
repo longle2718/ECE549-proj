@@ -21,8 +21,9 @@ blobSizeThresh = 10;
 
 d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
+f = cell(1, nFrame); % frame
 for k = 1:nFrame
-    [d{k}, p{k}] = featExtract(img{k}, blobSizeThresh, false);
+    [d{k}, p{k}, f{k}] = featExtract(img{k}, blobSizeThresh, false);
 end
 
 %% Noncorrelated suppression
@@ -110,7 +111,7 @@ save freqVec.mat freqVec
 %% Compute frequency vector for a test frame
 % Extract features from a test image
 file = dir(fullfile('imTest', '*.jpg'));
-imgTest = imread(fullfile('imTest', file(10).name));
+imgTest = imread(fullfile('imTest', file(2).name));
 [dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
 
 % Compute distance between sift descriptor using L2 norm

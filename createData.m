@@ -13,7 +13,7 @@ nFrame = numel(frameIdx);
 img = cell(1, nFrame);
 for k = 1:nFrame
     img{k} = read(vid, frameIdx(k));
-    imwrite(img{k},['imTrain/' num2str(k) '.jpg'], 'jpg');
+    imwrite(img{k},sprintf('imTrain/%.3d.jpg',k), 'jpg');
 end
 
 %% Test data
@@ -21,5 +21,5 @@ frameIdx = randi(vid.NumberOfFrames, 1, 10);
 nFrame = numel(frameIdx);
 for k = 1:nFrame
     img{k} = read(vid, frameIdx(k));
-    imwrite(img{k},['imTest/' num2str(k) '.jpg'], 'jpg');
+    imwrite(img{k},sprintf('imTest/%.3d.jpg',k), 'jpg');
 end
