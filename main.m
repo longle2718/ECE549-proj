@@ -90,13 +90,12 @@ SIGinv = inv(cov(D'));
 [C, A]= kmeans_mahal(single(D), K, SIGinv, 10);
 
 % Form visual dictionary
-vdictD = cell(1, K);
+%vdictD = cell(1, K);
 %vdictP = cell(1, K);
-for k = 1:K
-    vdictD{k} = D(:, A == k);
+%for k = 1:K
+%    vdictD{k} = D(:, A == k);
     %vdictP{k} = P(:, A == k);
-end
-%save vdict.mat vdictD
+%end
 
 % Debugging
 %{
@@ -122,8 +121,6 @@ for k = 1:nFrame
     wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./sum(cntVec));
 end
 
-%save wFreqVec.mat wFreqVec
-
 %% Compute frequency vector for a test frame
 % Extract features from a test image
 file = dir(fullfile('imTest', '*.jpg'));
@@ -137,11 +134,8 @@ distMat = mahal_dist(dTest, C, SIGinv);
 cntVecTest = hist(idx, K);
 wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./sum(cntVec));
 
-xlabel('Visual word');
-ylabel('Count');
-
 % Find the most similar image from the training dataset
-score = vl_alldist2(cntVecTest', cntVec', 'HELL'); % Hellinger distance for probability measures
+score = vl_alldist2(wFreqVecTest', wFreqVec', 'HELL'); % Hellinger distance for probability measures
 [sortScore, frameIdx] = sort(score);
 
 % Display the top N most similar images
