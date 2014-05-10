@@ -83,12 +83,11 @@ for k = 1:trackIdx
 end
 D = [D1 D2];
 
-% Find correlation matrix
-%SIG = cov(D');
 %% Clustering to find visual dictionary
 K = 2^6;
-[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
-%dist2 = mahal(D', D');
+%[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
+SIGinv = inv(cov(D'));
+[C, A]= kmeans_mahal(D, K, SIGinv, 10);
 
 % Form visual dictionary
 vdictD = cell(1, K);
