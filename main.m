@@ -120,6 +120,7 @@ wFreqVec = zeros(size(cntVec));
 for k = 1:nFrame
     wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./sum(cntVec));
 end
+save wFreqVec.mat wFreqVec
 
 %% Compute frequency vector for a test frame
 % Extract features from a test image
