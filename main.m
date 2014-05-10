@@ -87,7 +87,7 @@ D = [D1 D2];
 K = 2^6;
 %[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
 SIGinv = inv(cov(D'));
-[C, A]= kmeans_mahal(D, K, SIGinv, 10);
+[C, A]= kmeans_mahal(single(D), K, SIGinv, 10);
 
 % Form visual dictionary
 vdictD = cell(1, K);
@@ -111,7 +111,8 @@ end
 %% Compute frequency vectors for all training frames
 cntVec = zeros(nFrame, K);
 for k = 1:nFrame
-    distMat = vl_alldist2(d{k}, C); % L2 distance
+    %distMat = vl_alldist2(d{k}, C); % L2 distance
+    distMat = mahal_dist(d{k}, C, SIGinv);
     [~, idx] = min(distMat, [], 2);
     cntVec(k,:) = hist(idx, K);
 end
@@ -126,11 +127,12 @@ end
 %% Compute frequency vector for a test frame
 % Extract features from a test image
 file = dir(fullfile('imTest', '*.jpg'));
-imgTest = imread(fullfile('imTest', file(2).name));
+imgTest = imread(fullfile('imTest', file(7).name));
 [dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
 
-% Compute distance between sift descriptor using L2 norm
-distMat = vl_alldist2(dTest, C);
+% Compute distance between sift descriptor
+%distMat = vl_alldist2(dTest, C);
+distMat = mahal_dist(dTest, C, SIGinv);
 [~, idx] = min(distMat, [], 2);
 cntVecTest = hist(idx, K);
 wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./sum(cntVec));

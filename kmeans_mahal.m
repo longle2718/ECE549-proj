@@ -31,7 +31,7 @@ for k = 1:NumRepetitions
         end
         
         % Check for convergence
-        disp(norm(Ccurr - Cnew))
+        %disp(norm(Ccurr - Cnew))
         if norm(Ccurr - Cnew) < 1e-3
             break;
         end
