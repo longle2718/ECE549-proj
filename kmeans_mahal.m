@@ -17,8 +17,8 @@ for k = 1:NumRepetitions
         distMat = zeros(K, size(D, 2));
         for l = 1:size(D, 2)
             for m = 1:K
-                %distMat(m, l) = sqrt( (D(:, l) - Ccurr(:, m))'*SIGinv*(D(:, l) - Ccurr(:, m)) );
-                distMat(m, l) = sqrt( (D(:, l) - Ccurr(:, m))'*(D(:, l) - Ccurr(:, m)) );
+                distMat(m, l) = sqrt( (D(:, l) - Ccurr(:, m))'*SIGinv*(D(:, l) - Ccurr(:, m)) );
+                %distMat(m, l) = sqrt( (D(:, l) - Ccurr(:, m))'*(D(:, l) - Ccurr(:, m)) );
             end
         end
         % Find the new assignment
@@ -39,7 +39,7 @@ for k = 1:NumRepetitions
     end
     Citer{k} = Cnew;
     Aiter{k} = Anew;
-    sumd(k) = sum(dist); 
+    sumd(k) = sum(dist)
 end
 
 [minsumd, idx]= min(sumd);

@@ -76,18 +76,19 @@ D = cell2mat(d);
 TRACK = cell2mat(track);
 
 % Reduce the size of descriptors
-D1 = D(:,TRACK == 0);
-D2 = zeros(size(D,1), trackIdx);
+%D1 = D(:,TRACK == 0);
+Dtmp = zeros(size(D,1), trackIdx);
 for k = 1:trackIdx
-    D2(:, k) = mean(D(:,TRACK == k), 2);
+    Dtmp(:, k) = mean(D(:,TRACK == k), 2);
 end
-D = [D1 D2];
+%D = [D1 D2];
+D = Dtmp;
 
 %% Clustering to find visual dictionary
 K = 2^6;
 %[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
 SIGinv = inv(cov(D'));
-[C, A]= kmeans_mahal(single(D), K, SIGinv, 10);
+[C, A]= kmeans_mahal(single(D), K, SIGinv, 1);
 
 % Form visual dictionary
 %vdictD = cell(1, K);
@@ -125,7 +126,7 @@ save wFreqVec.mat wFreqVec
 %% Compute frequency vector for a test frame
 % Extract features from a test image
 file = dir(fullfile('imTest', '*.jpg'));
-imgTest = imread(fullfile('imTest', file(7).name));
+imgTest = imread(fullfile('imTest', file(1).name));
 [dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
 
 % Compute distance between sift descriptor
@@ -136,15 +137,16 @@ cntVecTest = hist(idx, K);
 wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./sum(cntVec));
 
 % Find the most similar image from the training dataset
-score = vl_alldist2(wFreqVecTest', wFreqVec', 'HELL'); % Hellinger distance for probability measures
+score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
 [sortScore, frameIdx] = sort(score);
 
-% Display the top N most similar images
-N = 5;
+% Display the top most similar images
 figure;
 set(gcf, 'units','normalized', 'position', [0 0 1 1])
-for k = 1:N
-    subplot(1,N,k); imshow(img{frameIdx(k)})
-    xlabel(sprintf('Relevance: %0.1f, Frame index: %d', 100-sortScore(k), frameIdx(k)))
+for k = 1:15
+    subplot(3,5,k); imshow(img{frameIdx(k)})
+    h = vl_plotframe(f{frameIdx(k)});
+    set(h,'color','y','linewidth',2);
+    xlabel(sprintf('Relevance: %0.1f, Frame index: %d', -sortScore(k), frameIdx(k)))
     %set(get(gca,'YLabel'),'Rotation',0)
 end
