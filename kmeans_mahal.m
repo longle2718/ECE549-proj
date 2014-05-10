@@ -39,7 +39,7 @@ for k = 1:NumRepetitions
     end
     Citer{k} = Cnew;
     Aiter{k} = Anew;
-    sumd(k) = sum(dist)
+    sumd(k) = sum(dist);
 end
 
 [minsumd, idx]= min(sumd);
