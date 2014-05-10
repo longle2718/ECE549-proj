@@ -96,7 +96,7 @@ for k = 1:K
     vdictD{k} = D(:, A == k);
     %vdictP{k} = P(:, A == k);
 end
-%save vdict.mat vdictD vdictP
+%save vdict.mat vdictD
 
 % Debugging
 %{
@@ -122,7 +122,7 @@ for k = 1:nFrame
     wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./sum(cntVec));
 end
 
-%save freqVec.mat freqVec
+%save wFreqVec.mat wFreqVec
 
 %% Compute frequency vector for a test frame
 % Extract features from a test image
