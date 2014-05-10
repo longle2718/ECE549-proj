@@ -6,6 +6,7 @@
 
 clear all; close all;
 %run('../../vlfeat/toolbox/vl_setup')
+rng('default')
 
 %% Very specific scene for this video.
 folder = 'imTrain';
