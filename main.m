@@ -117,10 +117,11 @@ for k = 1:nFrame
     [~, idx] = min(distMat, [], 2);
     cntVec(k,:) = hist(idx, K);
 end
+
 % Create weighted word frequencies
 wFreqVec = zeros(size(cntVec));
 for k = 1:nFrame
-    wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./sum(cntVec));
+    wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./(1+sum(cntVec)));
 end
 save wFreqVec.mat wFreqVec
 
@@ -135,7 +136,7 @@ imgTest = imread(fullfile('imTest', file(1).name));
 distMat = mahal_dist(dTest, C, SIGinv);
 [~, idx] = min(distMat, [], 2);
 cntVecTest = hist(idx, K);
-wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./sum(cntVec));
+wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./(1+sum(cntVec)));
 
 % Find the most similar image from the training dataset
 score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
