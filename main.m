@@ -77,19 +77,18 @@ D = cell2mat(d);
 TRACK = cell2mat(track);
 
 % Reduce the size of descriptors
-D1 = D(:,TRACK == 0);
+D1 = mean(D(:,TRACK == 0), 2); % All the others
 Dtmp = zeros(size(D,1), trackIdx);
 for k = 1:trackIdx
     Dtmp(:, k) = mean(D(:,TRACK == k), 2);
 end
 D = [D1 Dtmp];
-%D = Dtmp;
 
 %% Clustering to find visual dictionary
-K = 128;
+K = 256;
 %[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
 SIGinv = inv(cov(D'));
-[C, A, minsumd]= kmeans_mahal(single(D), K, SIGinv, 1, 10);
+[C, A, minsumd]= kmeans_mahal(single(D), K, SIGinv, 2, 10);
 
 % Debugging
 %{
