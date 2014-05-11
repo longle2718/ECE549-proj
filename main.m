@@ -9,7 +9,7 @@ clear all; close all;
 rng('default')
 
 %% Very specific scene for this video.
-folder = 'data';
+folder = 'imTrain';
 file = dir(fullfile(folder, '*.jpg'));
 nFrame = length(file);
 img = cell(1, nFrame);
@@ -122,18 +122,50 @@ wFreqVec = tfidf(cntVec, cntVec);
 save wFreqVec.mat wFreqVec
 
 %% Evaluate performance using the entire frame
-wFreqVecTest = tfidf(cntVec(47,:), cntVec);
-score = wFreqVec*wFreqVecTest'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2));
+% Load label
+rawlab = load('imTrain/label.txt');
+lab = zeros(nFrame, 1);
+for k = 1:size(rawlab,1)-1
+    lab(rawlab(k,1):rawlab(k+1,1)) = rawlab(k,2);
+end
+lab(rawlab(end,1):end) = rawlab(end,2);
+%figure; stem(lab)
+
+ANRR = zeros(nFrame, 1);
+for l = 1:nFrame
+    % Score is a normalized dot product
+    score = wFreqVec*wFreqVec(l,:)'/norm(wFreqVec(l,:))./sqrt(sum(wFreqVec.^2, 2));
+    score(isnan(score)) = 0; % Ignore wFreqVec with norm 0, i.e. frames with no or trivial words
+    [sortScore, frameIdx] = sort(score, 'descend');
+    
+    % Average normalized retrieval rank evaluation
+    Nrel = sum(lab == lab(l));
+    RRank = find(ismember(frameIdx, find(lab == lab(l))));
+    ANRR(l) = (sum(RRank) - Nrel*(Nrel+1)/2)/nFrame/Nrel;
+end
+figure; plot(ANRR)
+
+%{
+% Display the top most similar images
+idx = 47; % query image/frame index
+figure; imshow(img{idx})
+h = vl_plotframe(f{idx}(:,track{idx}~=0));
+set(h,'color','y','linewidth',2);
+
+score = wFreqVec*wFreqVec(idx,:)'/norm(wFreqVec(idx,:))./sqrt(sum(wFreqVec.^2, 2));
 score(isnan(score)) = 0; % Ignore wFreqVec with norm 0, i.e. frames with no or trivial words
 [sortScore, frameIdx] = sort(score, 'descend');
 
-% Display the top most similar images
 figure;
 set(gcf, 'units','normalized', 'position', [0 0 1 1])
 for k = 1:15
     subplot(3,5,k); imshow(img{frameIdx(k)})
     h = vl_plotframe(f{frameIdx(k)}(:,track{frameIdx(k)}~=0));
     set(h,'color','y','linewidth',2);
-    xlabel(sprintf('Relevance: %0.2f, Frame index: %d', sortScore(k), frameIdx(k)))
+    xlabel(sprintf('Relevance: %0.4f, Frame index: %d', sortScore(k), frameIdx(k)))
     %set(get(gca,'YLabel'),'Rotation',0)
 end
+
+% Display the ranks of the relevant images for a particular query image
+figure; stem(ismember(frameIdx, find(lab == lab(idx))))
+%}
