@@ -8,6 +8,17 @@ clear all; close all;
 %run('../../vlfeat/toolbox/vl_setup')
 rng('default')
 
+%% Create training data
+vid = VideoReader('charade.mp4');
+%frameIdx = randi(vid.NumberOfFrames, 1, 10);
+frameIdx = vid.FrameRate/2:vid.FrameRate:vid.NumberOfFrames;
+nFrame = numel(frameIdx);
+img = cell(1, nFrame);
+for k = 1:nFrame
+    img{k} = read(vid, frameIdx(k));
+    imwrite(img{k},sprintf('imTrain/%.3d.jpg',k), 'jpg');
+end
+
 %% Very specific scene for this video.
 folder = 'imTrain';
 file = dir(fullfile(folder, '*.jpg'));
