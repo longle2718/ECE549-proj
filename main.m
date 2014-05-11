@@ -18,7 +18,7 @@ for k = 1:nFrame
 end
 
 %% Feature extraction for training images
-blobSizeThresh = 10;
+blobSizeThresh = 0;
 
 d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
@@ -86,11 +86,10 @@ end
 D = Dtmp;
 
 %% Clustering to find visual dictionary
-K = 2^6;
+K = 128;
 %[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
 SIGinv = inv(cov(D'));
 [C, A, minsumd]= kmeans_mahal(single(D), K, SIGinv, 1);
-minsumd
 
 % Debugging
 %{
@@ -120,10 +119,7 @@ for k = 1:nFrame
 end
 
 % Create weighted word frequencies
-wFreqVec = zeros(size(cntVec));
-for k = 1:nFrame
-    wFreqVec(k,:) = cntVec(k,:)/sum(cntVec(k,:)).*log(nFrame./(1+sum(cntVec)));
-end
+wFreqVec = tfidf(cntVec, cntVec);
 save wFreqVec.mat wFreqVec
 
 %% Compute frequency vector for a test frame
@@ -133,11 +129,11 @@ imgTest = imread(fullfile('imTest', file(1).name));
 [dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
 
 % Compute distance between sift descriptor
-%distMat = vl_alldist2(dTest, C);
+%distMat = vl_alldist2(dTest, C); % L2 distance
 distMat = mahal_dist(dTest, C, SIGinv);
 [~, idx] = min(distMat, [], 2);
 cntVecTest = hist(idx, K);
-wFreqVecTest = cntVecTest/sum(cntVecTest).*log(nFrame./(1+sum(cntVec)));
+wFreqVecTest = tfidf(cntVecTest, cntVec);
 
 % Find the most similar image from the training dataset
 score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
@@ -147,6 +143,9 @@ score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
 figure;
 set(gcf, 'units','normalized', 'position', [0 0 1 1])
 for k = 1:15
+    if isnan(sortScore(k))
+        continue; % Ignore wFreqVec with norm 0, i.e. frames with only trivial words
+    end
     subplot(3,5,k); imshow(img{frameIdx(k)})
     h = vl_plotframe(f{frameIdx(k)});
     set(h,'color','y','linewidth',2);
