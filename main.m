@@ -114,7 +114,7 @@ for k = 1:nFrame
     %distMat = vl_alldist2(d{k}, C); % L2 distance
     distMat = mahal_dist(d{k}(:,track{k}~=0), C, SIGinv);
     [~, idx] = min(distMat, [], 2);
-    cntVec(k,:) = accumarray(idx, 1, [1 K]);
+    cntVec(k,:) = accumarray(idx, 1, [K 1])';
 end
 
 % Create weighted word frequencies
@@ -124,18 +124,16 @@ save wFreqVec.mat wFreqVec
 %% Evaluate performance using the entire frame
 wFreqVecTest = tfidf(cntVec(2,:), cntVec);
 score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
+score(isnan(score)) = 0; % Ignore wFreqVec with norm 0, i.e. frames with only trivial words
 [sortScore, frameIdx] = sort(score, 'descend');
 
 % Display the top most similar images
 figure;
 set(gcf, 'units','normalized', 'position', [0 0 1 1])
 for k = 1:15
-    if isnan(sortScore(k))
-        continue; % Ignore wFreqVec with norm 0, i.e. frames with only trivial words
-    end
     subplot(3,5,k); imshow(img{frameIdx(k)})
-    %h = vl_plotframe(f{frameIdx(k)});
-    %set(h,'color','y','linewidth',2);
-    %xlabel(sprintf('Relevance: %0.2f, Frame index: %d', sortScore(k), frameIdx(k)))
+    h = vl_plotframe(f{frameIdx(k)}(:,track{frameIdx(k)}~=0));
+    set(h,'color','y','linewidth',2);
+    xlabel(sprintf('Relevance: %0.2f, Frame index: %d', sortScore(k), frameIdx(k)))
     %set(get(gca,'YLabel'),'Rotation',0)
 end
