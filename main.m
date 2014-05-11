@@ -9,7 +9,7 @@ clear all; close all;
 rng('default')
 
 %% Very specific scene for this video.
-folder = 'imTrain';
+folder = 'data';
 file = dir(fullfile(folder, '*.jpg'));
 nFrame = length(file);
 img = cell(1, nFrame);
@@ -77,12 +77,13 @@ D = cell2mat(d);
 TRACK = cell2mat(track);
 
 % Reduce the size of descriptors
-D1 = mean(D(:,TRACK == 0), 2); % All the others
+%D1 = mean(D(:,TRACK == 0), 2); % All the others
 Dtmp = zeros(size(D,1), trackIdx);
 for k = 1:trackIdx
     Dtmp(:, k) = mean(D(:,TRACK == k), 2);
 end
-D = [D1 Dtmp];
+D = Dtmp;
+%D = [D1 Dtmp];
 
 %% Clustering to find visual dictionary
 K = 256;
@@ -100,7 +101,6 @@ for k = 1:K
     vdictP{k} = P(:, A == k);
 end
 
-figure; hist(double(A), K);
 figure;
 for k = 1:5%size(vdictP{15}, 2)
     imPatch = reshape(vdictP{1}(:,k), 41,41);
@@ -112,29 +112,17 @@ end
 cntVec = zeros(nFrame, K);
 for k = 1:nFrame
     %distMat = vl_alldist2(d{k}, C); % L2 distance
-    distMat = mahal_dist(d{k}, C, SIGinv);
+    distMat = mahal_dist(d{k}(:,track{k}~=0), C, SIGinv);
     [~, idx] = min(distMat, [], 2);
-    cntVec(k,:) = hist(idx, K);
+    cntVec(k,:) = accumarray(idx, 1, [1 K]);
 end
 
 % Create weighted word frequencies
 wFreqVec = tfidf(cntVec, cntVec);
 save wFreqVec.mat wFreqVec
 
-%% Compute frequency vector for a test frame
-% Extract features from a test image
-file = dir(fullfile('imTest', '*.jpg'));
-imgTest = imread(fullfile('imTest', file(1).name));
-[dTest, pTest] = featExtract(imgTest, blobSizeThresh, true);
-
-% Compute distance between sift descriptor
-%distMat = vl_alldist2(dTest, C); % L2 distance
-distMat = mahal_dist(dTest, C, SIGinv);
-[~, idx] = min(distMat, [], 2);
-cntVecTest = hist(idx, K);
-wFreqVecTest = tfidf(cntVecTest, cntVec);
-
-% Find the most similar image from the training dataset
+%% Evaluate performance using the entire frame
+wFreqVecTest = tfidf(cntVec(2,:), cntVec);
 score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
 [sortScore, frameIdx] = sort(score, 'descend');
 
@@ -146,8 +134,8 @@ for k = 1:15
         continue; % Ignore wFreqVec with norm 0, i.e. frames with only trivial words
     end
     subplot(3,5,k); imshow(img{frameIdx(k)})
-    h = vl_plotframe(f{frameIdx(k)});
-    set(h,'color','y','linewidth',2);
-    xlabel(sprintf('Relevance: %0.2f, Frame index: %d', sortScore(k), frameIdx(k)))
+    %h = vl_plotframe(f{frameIdx(k)});
+    %set(h,'color','y','linewidth',2);
+    %xlabel(sprintf('Relevance: %0.2f, Frame index: %d', sortScore(k), frameIdx(k)))
     %set(get(gca,'YLabel'),'Rotation',0)
 end
