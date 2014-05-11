@@ -1,4 +1,4 @@
-function [C, A, minsumd] = kmeans_mahal(D, K, SIGinv, NumRepetitions)
+function [C, A, minsumd] = kmeans_mahal(D, K, SIGinv, NumRepetitions, maxIter)
 %
 % K-means using Mahalanobis distance
 % Output
@@ -12,7 +12,7 @@ sumd = zeros(1, NumRepetitions);
 for k = 1:NumRepetitions
     % Initialization
     Ccurr = D(:, randsample(size(D, 2), K));
-    while(1)
+    for iter = 1:maxIter
         % Compute the distance matrix
         distMat = mahal_dist(D, Ccurr, SIGinv);
         

@@ -18,7 +18,7 @@ for k = 1:nFrame
 end
 
 %% Feature extraction for training images
-blobSizeThresh = 0;
+blobSizeThresh = 10;
 
 d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
@@ -77,19 +77,19 @@ D = cell2mat(d);
 TRACK = cell2mat(track);
 
 % Reduce the size of descriptors
-%D1 = D(:,TRACK == 0);
+D1 = D(:,TRACK == 0);
 Dtmp = zeros(size(D,1), trackIdx);
 for k = 1:trackIdx
     Dtmp(:, k) = mean(D(:,TRACK == k), 2);
 end
-%D = [D1 Dtmp];
-D = Dtmp;
+D = [D1 Dtmp];
+%D = Dtmp;
 
 %% Clustering to find visual dictionary
 K = 128;
 %[C, A]= vl_kmeans(single(D), K, 'NumRepetitions', 10); % using L2 distance
 SIGinv = inv(cov(D'));
-[C, A, minsumd]= kmeans_mahal(single(D), K, SIGinv, 1);
+[C, A, minsumd]= kmeans_mahal(single(D), K, SIGinv, 1, 10);
 
 % Debugging
 %{
