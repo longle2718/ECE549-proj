@@ -29,7 +29,7 @@ for k = 1:nFrame
 end
 
 %% Feature extraction for training images
-blobSizeThresh = 10;
+blobSizeThresh = 0;
 
 d = cell(1, nFrame); % descriptor
 p = cell(1, nFrame); % raw patch
@@ -161,7 +161,7 @@ set(gca, 'fontsize', 15);
 
 %{
 % Display the top most similar images
-idx = 15; % query image/frame index
+idx = 89; % query image/frame index
 figure; imshow(img{idx})
 h = vl_plotframe(f{idx}(:,track{idx}~=0));
 set(h,'color','y','linewidth',2);
