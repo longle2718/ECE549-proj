@@ -8,14 +8,13 @@
 clear all; close all
 
 % Load visual database
-load demo.mat wFreqVec d f track SIGinv C
+load demo.mat wFreqVec d f track SIGinv C cntVec img
 nFrame = size(wFreqVec, 1);
 K = size(wFreqVec, 2);
 
 % Ask for frame to select
 idx = input(sprintf('Please select a frame to search for (among %d frames):', nFrame));
-img = imread(sprintf('imTrain/%.3d.jpg',idx));
-figure; imshow(img);
+figure; imshow(img{idx});
 
 disp('Select object by specifying a rectangle')
 while 1
@@ -38,7 +37,7 @@ end
 % Form query weighted frequency vector
 sel = f{idx}(1, :) >= x1 & f{idx}(1, :) <= x2 & f{idx}(2, :) >= y1 & f{idx}(2, :) <= y2 ;
 
-imshow(img)
+imshow(img{idx})
 h = vl_plotframe(f{idx}(:,track{idx}~=0 & sel));
 set(h,'color','y','linewidth',2);
 if (sum(sel & track{idx}~=0) == 0)

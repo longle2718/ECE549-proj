@@ -130,7 +130,7 @@ end
 
 % Create weighted word frequencies
 wFreqVec = tfidf(cntVec, cntVec);
-save demo.mat wFreqVec d f track SIGinv C
+save demo.mat wFreqVec d f track SIGinv C cntVec img
 
 %% Evaluate performance using the entire frame
 % Load label
@@ -161,7 +161,7 @@ set(gca, 'fontsize', 15);
 
 %{
 % Display the top most similar images
-idx = 47; % query image/frame index
+idx = 15; % query image/frame index
 figure; imshow(img{idx})
 h = vl_plotframe(f{idx}(:,track{idx}~=0));
 set(h,'color','y','linewidth',2);
