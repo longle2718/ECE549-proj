@@ -130,7 +130,7 @@ end
 
 % Create weighted word frequencies
 wFreqVec = tfidf(cntVec, cntVec);
-save wFreqVec.mat wFreqVec
+save demo.mat wFreqVec d f track SIGinv C
 
 %% Evaluate performance using the entire frame
 % Load label
