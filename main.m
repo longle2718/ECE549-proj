@@ -143,7 +143,10 @@ for l = 1:nFrame
     RRank = find(ismember(frameIdx, find(lab == lab(l))));
     ANRR(l) = (sum(RRank) - Nrel*(Nrel+1)/2)/nFrame/Nrel;
 end
-figure; plot(ANRR)
+figure; plot(ANRR, 'linewidth', 2); axis('tight')
+xlabel('Frame Index', 'fontsize', 15);
+ylabel('Average Normalized Retrieval Rank', 'fontsize', 15);
+set(gca, 'fontsize', 15);
 
 %{
 % Display the top most similar images
