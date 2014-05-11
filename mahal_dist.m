@@ -16,6 +16,6 @@ N = size(C, 2);
 distMat = zeros(M, N);
 for k = 1:M
     for l = 1:N
-        distMat(k, l) = sqrt((D(:,k)-C(:,l))'*SIGinv*(D(:,k)-C(:,l)));
+        distMat(k, l) = sqrt( (D(:,k)-C(:,l))'*SIGinv*(D(:,k)-C(:,l)) );
     end
 end

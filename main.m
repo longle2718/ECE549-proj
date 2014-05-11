@@ -122,9 +122,9 @@ wFreqVec = tfidf(cntVec, cntVec);
 save wFreqVec.mat wFreqVec
 
 %% Evaluate performance using the entire frame
-wFreqVecTest = tfidf(cntVec(2,:), cntVec);
-score = wFreqVecTest*wFreqVec'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2)');
-score(isnan(score)) = 0; % Ignore wFreqVec with norm 0, i.e. frames with only trivial words
+wFreqVecTest = tfidf(cntVec(47,:), cntVec);
+score = wFreqVec*wFreqVecTest'/norm(wFreqVecTest)./sqrt(sum(wFreqVec.^2, 2));
+score(isnan(score)) = 0; % Ignore wFreqVec with norm 0, i.e. frames with no or trivial words
 [sortScore, frameIdx] = sort(score, 'descend');
 
 % Display the top most similar images
