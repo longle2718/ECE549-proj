@@ -64,7 +64,7 @@ end
 imgTest = imgs{30};
 [dTest, pTest, fTest] = featExtract(imgTest, blobSizeThresh, true);
 
-imshow(imgTest);
+figure; imshow(imgTest);
 title(sprintf('Choose a part of image to search'));
 rect = getrect();
 rectangle('Position',rect,'EdgeColor','yellow');
@@ -108,9 +108,10 @@ score = vl_alldist2(freqVecTest', newFreqVec', 'HELL');
 index = 1;
 matches = [];
 
+figure;
 for i = 1:size(score, 2)
-    if score(i) <= 0.8
-        subplot(5,5,index), imshow(imgs{i});
+    if single(score(i)) <= 0.8
+        subplot(4,4,index), imshow(imgs{i});
         index = index + 1;
     end
 end
