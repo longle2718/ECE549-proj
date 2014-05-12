@@ -158,6 +158,7 @@ figure; plot(ANRR, 'linewidth', 2); axis('tight')
 xlabel('Frame Index', 'fontsize', 15);
 ylabel('Average Normalized Retrieval Rank', 'fontsize', 15);
 set(gca, 'fontsize', 15);
+print('-dpng', 'doc/ANRR.png');
 
 %{
 % Display the top most similar images
