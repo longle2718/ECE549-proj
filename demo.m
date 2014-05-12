@@ -31,7 +31,7 @@ while 1
     x2 = x; y2 = y;
     
     % Assertion: x2, y2 > x1, y1
-    rectangle('position', [x1 y1 x2-x1 y2-y1], 'EdgeColor', 'y')
+    rectangle('position', [x1 y1 x2-x1 y2-y1], 'EdgeColor', 'y', 'linewidth', 3)
 end
 
 % Form query weighted frequency vector

@@ -486,7 +486,7 @@ The outline of an algorithm for Video Google is given as follows.
 \item The surviving descriptors are further clustered into visual words using K-means with Mahalanobis distance, effectively converts 
 the image retrieval problem into the well-known document retrieval problem.
 \item The standard term frequency-inverse document frequency (tf-idf) statistic  can be used to represented each image. The relevance measure
-between two images are defined to be the normalized scalar product between their respective tf-idf statistics. This relevance measure is
+between two images are defined to be the correlation (normalized scalar product) between their respective tf-idf statistics. This relevance measure is
 then used for ranking and retrieval.
 \end{itemize}
 
@@ -506,29 +506,106 @@ Exploiting this structure, via a tracking mechanism, can help pruning out noisy 
 that need consideration later.
 
 While \cite{sivic2003video} mentioned a tracking mechanism based on "a simple constant velocity dynamical model and correlation", 
-the detail implementation information is not available. In this project, a (potentially different) tracking mechanism is proposed, based on our own 
+information about its detail implementation is not available. In this project, a (potentially different) tracking mechanism is proposed, based on our own 
 interpretation of the original statement in \cite{sivic2003video}. That is, for every two consecutive frames, a correlation matrix between 
-their descriptors, extracted independently from the previous step, is formed. An element inside the matrix that is greater than 
+their descriptors, extracted independently from the previous step, is formed. 
+A high-value element of the matrix 
+indicates that the corresponding descriptors are likely to be the same across two frames. These descriptors are considered to be in the same track. 
+All descriptors in the same track are summarized by their average. Descriptors that does not 
+have any correlation to the frame before and after it are deemed noisy and pruned out.
 
 \subsection{Clustering into visual words}
+The surviving descriptors are clustered using the K-means algorithm with the Mahalanobis distance criterion, i.e.
+$$
+d(\bar{\mathbf{x}}_1, \bar{\mathbf{x}}_2) = \sqrt{(\bar{\mathbf{x}}_1  - \bar{\mathbf{x}}_2)^T\Sigma^{-1}
+(\bar{\mathbf{x}}_1  - \bar{\mathbf{x}}_2)}
+$$
+where $\bar{\mathbf{x}}_i$ is the average descriptor of track $i$ and $\Sigma$ is the covariance matrix estimated from 
+all the tracked  average descriptors.
+
+The K clusters form K "visual words" and effectively converted the image search problem into the well-known document search problem.
 
 \subsection{Representing images using Tf-idf statistics}
+Using a visual vocabulary of K visual words, each image can now be represented by a vector-valued statistic with dimension K called term 
+frequency-inverse document frequency (tf-idf) \cite{salton1983introduction, salton1988term} $(s_1, \dots, s_i, \dots, s_K)^T$ with
+$$
+s_i = \text{tf}(i, d) \times \text{idf}(i, D)
+$$
+where 
+$$
+\begin{aligned}
+\text{tf}(i, d) &= \frac{n_{id}}{n_d}\\
+\text{idf}(i, D) &= \log\frac{N}{1+|\{d\in D: i\in d\}|}
+\end{aligned}
+$$
+and $n_{id}$ is the number of visual word $i$ in image $d$, $n_d$ is the number of visual words in image $d$, $D$ is the set of all frames
+in the video, and $N = |D|$.
+
+Intuitively, the tf term characterizes an image by the frequencies of visual words in it. However, commonly occurred visual words among the entire
+video should be weighted down for a good characterization. This is the idea behind the idf term, which down weights the frequency of a visual word
+that appears in many frames of the video. The extra 1 in the numerator of idf is simply a practical adjustment to avoid a division-by-zero.
+
+Using the tf-idf statistics as a representation, two images can now be measured for relevance by the correlation operator. All subsequent ranking 
+and retrieval are based on this relevance measure.
 
 \section{Performance evaluation}
 \label{sec:perf}
+The algorithm described in Section \ref{sec:alg} is applied to a video clip of the Charade movie. The video clip has a total of 3948 frames sampling at
+the standard rate of 24 frames per second. Due to (1) limited computational power (in this case, a laptop) and (2) costly labeling time, the clip is down sampled to 1 frame per second, thus leaving a total 165 frames \footnote{This is around the same number of frames that was used for performance evaluation in \cite{sivic2003video} }. Each frame is then manually labeled into a category based on their similarity. There are 
+a total of 25 categories.
 
-The {\it vl\_covdet} with the flag {\it 'EstimateAffineShape'} set to true.
+Feature detection and description was done using the  {\it vl\_covdet} API of VLFeat \cite{vedaldi08vlfeat}, with the flag {\it 'EstimateAffineShape'} 
+set to true and the threshold {\it PeakThreshold} and {\it EdgeThreshold} both set to 5. This yields a total of 47617 descriptors for all 165 frames.
+
+Tracking was done with a correlation threshold set to 0.8, that is, the correlation between two descriptors of two consecutive frames needs to exceed 0.8
+in order to form a track. This lefts a total of 8102 tracked average descriptors. These are then clustered into 256 visual words, and are used to represent 
+each frame in the video by a 256 dimension tf-idf vector.
+
+Given a query image, similarity between it and all the frames in the video can be measured by correlating their respective tf-idf vectors. This is used to rank
+the frames in the video. In order to objectively evaluate the performance of our implementation, the average normalized retrieval rank (ANRR) criterion
+is used \cite{muller2002truth}.
+$$
+\text{ANRR} = 
+$$
+where
+
+
+
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=0.7\linewidth]{ANRR}
+\includegraphics[width=\linewidth]{ANRR}
 \caption{Performance over a movie clip from the movie Charade.}
 \label{fig:anrr}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{selImage}
+\caption{Performance over a movie clip from the movie Charade.}
+\label{fig:selImage}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{selFeatExtract}
+\caption{Performance over a movie clip from the movie Charade.}
+\label{fig:selFeatExtract}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{picSearchResult}
+\caption{Performance over a movie clip from the movie Charade.}
+\label{fig:picSearchResult}
 \end{figure}
 
 \section{Discussion and Conclusions}
 \label{sec:concl}
 The project code and documentation repo can be accessed at the following URL \url{https://github.com/long0612/ECE549-proj}.
+
+Future direction could be exploiting spatial consistency to further improve performance
 
 \section{Statement of individual contribution}
 Amey Chaugule discovered the website that has a demo of \cite{sivic2003video}  at 
