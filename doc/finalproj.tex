@@ -424,7 +424,8 @@ Email: longle1@illinois.edu and achaugu2@illinois.edu}
 This project proposes to implement a system that finds all relevant frames for a given query image in videos, hence 
 the name Video Google. It uses the algorithm developed by Sivic and Zisserman in \cite{sivic2003video}, with minor modifications. 
 The basic algorithm consists of the following steps. First, feature detection and descriptions are done independently for each frame in a video.
-Then a tracking mechanism based on a simple dynamical model and correlation is used to pruned out many noisy descriptors. The surviving
+Then a tracking mechanism based on a simple video dynamical model and correlation is used to pruned out many noisy descriptors across frames. 
+The surviving
 descriptors are further clustered into visual words using K-means with Mahalanobis distance, effectively converts the image retrieval 
 problem into the well-known document retrieval problem. Therefore the standard term frequency-inverse document frequency (tf-idf) statistic  can
 be used to represented each image for the ranking and retrieval purpose. The retrieval performance is evaluated using the average normalized 
@@ -481,7 +482,7 @@ final system performance in relation with its algorithm are given in Section \re
 The outline of an algorithm for Video Google is given as follows.
 \begin{itemize}
 \item Feature detection and descriptions are done independently for each frame in a video.
-\item A tracking mechanism based on a simple dynamical model and correlation is used to pruned out many noisy descriptors.
+\item A tracking mechanism based on a simple video dynamical model and correlation is used to pruned out many noisy descriptors across frames.
 \item The surviving descriptors are further clustered into visual words using K-means with Mahalanobis distance, effectively converts 
 the image retrieval problem into the well-known document retrieval problem.
 \item The standard term frequency-inverse document frequency (tf-idf) statistic  can be used to represented each image. The relevance measure
@@ -494,11 +495,20 @@ For each frame in a video, interesting regions, or features, are detected and de
 In \cite{sivic2003video}, the type of region considered are Shaped-Adapted (SA) and Maximally Stable (MS) regions. However, in this project,
 only Shape-Adapted regions are considered because Maximally Stable (MS) regions has become obsolete. 
 
-For this task, the choice of detector is Difference of Gaussian (DoG) and the descriptor is SIFT. These are standard, state-of-the-art choice for many
-computer vision systems and thus readily-available implementations are available online. This project used the VLFeat \cite{vedaldi08vlfeat} toolbox
-in particular.
+For this detection task, the choice of detector is Difference of Gaussian (DoG) and descriptor is SIFT. These are standard, state-of-the-art choice for many
+computer vision systems and thus reliable implementations are available online. This project used the VLFeat \cite{vedaldi08vlfeat} toolbox
+in particular. 
 
 \subsection{Descriptor tracking between frames}
+It is worth noting that image searching in a video is different than searching in a collection of images.
+Specifically, there are usually strong temporal structures between video frames, which does not exist for an arbitrary image collection.
+Exploiting this structure, via a tracking mechanism, can help pruning out noisy descriptors and significantly reducing the amount of descriptors
+that need consideration later.
+
+While \cite{sivic2003video} mentioned a tracking mechanism based on "a simple constant velocity dynamical model and correlation", 
+the detail implementation information is not available. In this project, a (potentially different) tracking mechanism is proposed, based on our own 
+interpretation of the original statement in \cite{sivic2003video}. That is, for every two consecutive frames, a correlation matrix between 
+their descriptors, extracted independently from the previous step, is formed. An element inside the matrix that is greater than 
 
 \subsection{Clustering into visual words}
 
@@ -506,6 +516,8 @@ in particular.
 
 \section{Performance evaluation}
 \label{sec:perf}
+
+The {\it vl\_covdet} with the flag {\it 'EstimateAffineShape'} set to true.
 
 \begin{figure}[!t]
 \centering
