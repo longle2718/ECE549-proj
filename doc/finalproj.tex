@@ -331,7 +331,7 @@
 
 % *** PDF, URL AND HYPERLINK PACKAGES ***
 %
-%\usepackage{url}
+\usepackage{url}
 % url.sty was written by Donald Arseneau. It provides better support for
 % handling and breaking URLs. url.sty is already installed on most LaTeX
 % systems. The latest version can be obtained at:
@@ -369,9 +369,9 @@
 % affiliations
 \author{\IEEEauthorblockN{Long Le and Amey Chaugule}
 \IEEEauthorblockA{Department of Electrical and Computer Engineering\\
-University of Illinois at Urbana-Champaign}}
+University of Illinois at Urbana-Champaign}%}
 %Atlanta, Georgia 30332--0250\\
-%Email: http://www.michaelshell.org/contact.html}
+Email: longle1@illinois.edu and achaugu2@illinois.edu}
 %\and
 %\IEEEauthorblockN{Homer Simpson}
 %\IEEEauthorblockA{Twentieth Century Fox\\
@@ -421,8 +421,8 @@ University of Illinois at Urbana-Champaign}}
 
 \begin{abstract}
 %\boldmath
-This project proposes to implement a system that finds all relevant images for a given query image in videos, hence 
-the name video google. It uses the algorithm developed by Sivic and Zisserman in \cite{sivic2003video}, with minor modifications. 
+This project proposes to implement a system that finds all relevant frames for a given query image in videos, hence 
+the name Video Google. It uses the algorithm developed by Sivic and Zisserman in \cite{sivic2003video}, with minor modifications. 
 The basic algorithm consists of the following steps. First, feature detection and descriptions are done independently for each frame in a video.
 Then a tracking mechanism based on a simple dynamical model and correlation is used to pruned out many noisy descriptors. The surviving
 descriptors are further clustered into visual words using K-means with Mahalanobis distance, effectively converts the image retrieval 
@@ -461,15 +461,29 @@ an image object is simply a sub-part of an image, the system is also demonstrate
 % no \IEEEPARstart
 \label{sec:intro}
 Large amount of video data are being generated every day, especially for surveillance and monitoring applications. 
-However, for a given 
-Motivated by the needs to search through large amount of surveillance videos for interesting objects, 
-\cite{sivic2003video}
+Searching for interesting objects in such big video data manually is a time consuming task. This motivates the need to automate image 
+search in videos. Specifically, one would like a system that, given a query image, responses with a list of the most relevant frames in a video.
+An implementation of such a system, dubbed Video Google for the apparent reason, is the goal of this project.
+
+An algorithm for Video Google was developed by Sivic and Zisserman in \cite{sivic2003video}. They proposed a method to map the image
+search problem into the well-known document search problem. This is achieved by asserting that there is an analogy between 
+interesting regions in an image and words in a document. The interesting regions are referred to as "visual word" \cite{sivic2003video},
+and are obtained by running K-means on all the descriptors of interesting regions. Once the problem mapping is done, standard techniques
+from the document retrieval literature, namely term frequency-inverse document frequency (tf-idf) \cite{salton1983introduction, salton1988term}
+can be applied for the search and retrieval tasks. In addition, the popular Average Normalized Retrieval Rank (ANRR) \cite{muller2002truth} performance criterion for document search can also be used to evaluate the performance of an image search system.
+
+Our  implementation of Video Google follows closely with the algorithm outlined in \cite{sivic2003video}, but with minor modifications and simplifications.
+The details are given in Section \ref{sec:alg}. The performance of the system is shown in Section \ref{sec:perf}. Finally, discussion about the final system
+performance in relation with its algorithm are given in Section {sec:concl}.
 
 \section{Algorithm}
-For feature detection, only Shape-Adapted regions are considered in this work. Maximally Stable (MS) regions 
+\label{sec:alg}
+The outline of an algorithm for Video Google
 
-\section{Results}
+For feature detection, only Shape-Adapted regions are considered in this work. Maximally Stable (MS) regions \cite{vedaldi08vlfeat}.
 
+\section{Performance evaluation}
+\label{sec:perf}
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.7\linewidth]{ANRR}
@@ -478,8 +492,14 @@ For feature detection, only Shape-Adapted regions are considered in this work. M
 \end{figure}
 
 \section{Discussion and Conclusions}
+The project code and documentation repo can be accessed at the following URL \url{https://github.com/long0612/ECE549-proj}.
 
 \section{Statement of individual contribution}
+Amey Chaugule discovered the website that has a demo of \cite{sivic2003video}  at 
+\url{http://www.robots.ox.ac.uk/~vgg/research/vgoogle/} and downloaded the Charade video clip that was used in this project. He also
+authored a few lines of code that was not used in the project eventually. 
+
+Long Le did everything else.
 
 % conference papers do not normally have an appendix
 
