@@ -423,7 +423,7 @@ Email: longle1@illinois.edu and achaugu2@illinois.edu}
 %\boldmath
 This project proposes to implement a system that finds all relevant frames for a given query image in videos, hence 
 the name Video Google. It uses the algorithm developed by Sivic and Zisserman in \cite{sivic2003video}, with minor modifications. 
-The basic algorithm consists of the following steps. First, feature detection and descriptions are done independently for each frame in a video.
+The basic algorithm consists of the following steps. First, feature detection and description are done independently for each frame in a video.
 Then a tracking mechanism based on a simple video dynamical model and correlation is used to pruned out many noisy descriptors across frames. 
 The surviving
 descriptors are further clustered into visual words using K-means with Mahalanobis distance, effectively converts the image retrieval 
@@ -495,7 +495,7 @@ For each frame in a video, interesting regions, or features, are detected and de
 In \cite{sivic2003video}, the type of region considered are Shaped-Adapted (SA) and Maximally Stable (MS) regions. However, in this project,
 only Shape-Adapted regions are considered because Maximally Stable (MS) regions has become obsolete. 
 
-For this detection task, the choice of detector is Difference of Gaussian (DoG) and descriptor is SIFT. These are standard, state-of-the-art choice for many
+For this detection task, the choice of detector is Difference of Gaussian (DoG) and descriptor is SIFT. These are standard, state-of-the-art choices for many
 computer vision systems and thus reliable implementations are available online. This project used the VLFeat \cite{vedaldi08vlfeat} toolbox
 in particular. 
 
@@ -521,14 +521,14 @@ d(\bar{\mathbf{x}}_1, \bar{\mathbf{x}}_2) = \sqrt{(\bar{\mathbf{x}}_1  - \bar{\m
 (\bar{\mathbf{x}}_1  - \bar{\mathbf{x}}_2)}
 $$
 where $\bar{\mathbf{x}}_i$ is the average descriptor of track $i$ and $\Sigma$ is the covariance matrix estimated from 
-all the tracked  average descriptors. The use of the general Mahalanobis distance instead of the common L2 distance is to (1) decorrelated
-components of the 128 dimension SIFT descriptors and (2) weight down noisy components, i.e. components with high variance, before clustering.
+all the tracked  average descriptors. The use of the general Mahalanobis distance instead of the common L2 distance is to (1) decorrelate
+components of the 128 dimension SIFT descriptors and (2) down-weight noisy components, i.e. components with high variance, before clustering.
 
 
 The K clusters form K "visual words" and effectively converted the image search problem into the well-known document search problem.
 
-\subsection{Representing images using Tf-idf statistics}
-Using a visual vocabulary of K visual words, each image can now be represented by a vector-valued statistic with dimension K called term 
+\subsection{Representing images using the tf-idf statistics}
+Using a visual vocabulary of K visual words, each image can now be represented by a vector-valued statistic, with dimension K, called term 
 frequency-inverse document frequency (tf-idf) \cite{salton1983introduction, salton1988term} $(s_1, \dots, s_i, \dots, s_K)^T$ with
 $$
 s_i = \text{tf}(i, d) \times \text{idf}(i, D)
@@ -544,7 +544,7 @@ and $n_{id}$ is the number of visual word $i$ in image $d$, $n_d$ is the number 
 in the video, and $N = |D|$.
 
 Intuitively, the tf term characterizes an image by the frequencies of visual words in it. However, commonly occurred visual words among the entire
-video should be weighted down for a good characterization. This is the idea behind the idf term, which down weights the frequency of a visual word
+video should be weighted down for a good characterization. This is the idea behind the idf term, which down-weights the frequency of a visual word
 that appears in many frames of the video. The extra 1 in the numerator of idf is simply a practical adjustment to avoid a division-by-zero.
 
 Using the tf-idf statistics as a representation, any two images can now be measured for relevance by the correlation operator. All subsequent ranking 
@@ -553,7 +553,7 @@ and retrieval are based on this relevance measure.
 \section{Performance evaluation}
 \label{sec:perf}
 The algorithm described in Section \ref{sec:alg} is applied to a video clip of the Charade movie. The video clip has a total of 3948 frames sampling at
-the standard rate of 24 frames per second. Due to (1) limited computational power (in this case, a laptop) and (2) costly labeling time, the clip is down sampled to 1 frame per second, thus leaving a total 165 frames \footnote{This is around the same number of frames that was used for performance evaluation in \cite{sivic2003video} }. Each frame is then manually labeled into a category based on their similarity. There are 
+the standard rate of 24 frames per second. Due to (1) the limited computational power (in this case, a laptop) and (2) the costly labeling time, the clip is down sampled to 1 frame per second, thus leaving a total 165 frames \footnote{This is around the same number of frames that was used for performance evaluation in \cite{sivic2003video} }. Each frame is then manually labeled into categories based on their similarity. There are 
 a total of 25 categories.
 
 Feature detection and description was done using the  {\it vl\_covdet} API of VLFeat \cite{vedaldi08vlfeat}, with the flag {\it 'EstimateAffineShape'} 
@@ -563,14 +563,14 @@ Tracking was done with a correlation threshold set to 0.8, that is, the correlat
 in order to form a track. This lefts a total of 8102 tracked average descriptors. These are clustered into 256 visual words, which are then used to represent 
 any image by a 256 dimension tf-idf vector.
 
-Similarity between a given query image and all the frames in the video can be measured by correlating their respective tf-idf vectors. This is used to rank
-the frames in the video for query relevance. In order to objectively evaluate the performance of our implementation, the average normalized retrieval rank (ANRR) criterion
+The similarity between a given query image and all the frames in the video can be measured by correlating their respective tf-idf vectors. This is used to rank
+the frames in the video for relevance. In order to objectively evaluate the performance of our implementation, the average normalized retrieval rank (ANRR) criterion
 is used \cite{muller2002truth}.
 $$
 \text{ANRR} = \frac{1}{NN_{rel}} \big( \sum_{i = 1}^{N_{rel}} R_i - \frac{N_{rel}(N_{rel}+1)}{2} \big) \in [0, 1)
 $$
 where $N_{rel}$ is the number of relevant frames for a given query image, and $R_{i} \in [1, \dots, 165]$ is the rank of the $i$th relevant frame.
-The relevancy of frames are determined from labels.
+The relevance of a frame is determined from the 25 categorical labels.
 Intuitively, beside the normalizing factor $NN_{rel}$, the merit of the ANRR criterion can be interpreted by the term inside the bracket. 
 For a perfect retrieval, i.e.
 $R_i = i, i = 1, \dots, N_{rel}$, ANRR is 0. Anything else will increase ANRR with the worst case, i.e. $R_i = i, i = N-N_{rel}+1, \dots, N$, 
@@ -579,11 +579,6 @@ retrieval \cite{muller2002truth}.
 
 Similar to \cite{sivic2003video}, in this project, ANRR is computed for all 165 frames using each in turn  as a query image, and is shown in Figure \ref{fig:anrr}.
 Even in the worst case, ANRR of the system is 0.3677, which is still better than random retrieval.
-
-The high peaks in Figure \ref{fig:anrr} correspond to frames that do not have temporal structures in the video clips. 
-These frames basically violate the assumption of the algorithm in Section \ref{sec:alg} and as a result, very few descriptors survive. 
-This explains their reduction in ranking performance.
-
 
 \begin{figure}[!t]
 \centering
@@ -596,10 +591,15 @@ This explains their reduction in ranking performance.
 \section{Discussion and Conclusions}
 \label{sec:concl}
 
+The high peaks in Figure \ref{fig:anrr} correspond to frames that do not have temporal structures in the video clip. 
+Therefore most of the descriptors in these frames are pruned out by the algorithm in Section \ref{sec:alg} 
+and as a result, very few descriptors survive. This explains the reduction in the ranking performance for these frames.
+
+
 Since an image object is just a sub-part of an image, the system can also be demonstrated to retrieve objects in videos with 
-relatively high confidence. Figures \ref{fig:selImage} and \ref{fig:selFeatExtract} shows the selection and feature extraction of an object
+relatively high confidence. Figures \ref{fig:selImage} and \ref{fig:selFeatExtract} show the selection and feature extraction of an object
 in frame 47. Because there are only a few descriptors extracted in that object, the retrieval performance, shown in 
-Figure \ref{fig:picSearchResult} with the decreasing rank goes from left to right and up to down, 
+Figure \ref{fig:picSearchResult} with a decreasing ranking goes from left to right and top to bottom, 
 is not perfect. Frame number 47 is actually ranked number 10.
 
 \begin{figure}[!t]
@@ -623,10 +623,9 @@ is not perfect. Frame number 47 is actually ranked number 10.
 \label{fig:picSearchResult}
 \end{figure}
 
-In another object selection for frame 44, more descriptors are selected and yields a perfect ranking/retrieving performance (See Figures
+In another object selection for frame 44, with more descriptors selected, the system yields a perfect ranking/retrieving performance (See Figures
 \ref{fig:selImage}, \ref{fig:selFeatExtract}, and \ref{fig:picSearchResult}). 
-Notice that across the
-all the frames in the video clip, only frame 45 and 46 are related to frame 44.
+Notice that across all the frames in the video clip, only frame 45 and 46 are related to frame 44.
 
 \begin{figure}[!t]
 \centering
@@ -649,11 +648,11 @@ all the frames in the video clip, only frame 45 and 46 are related to frame 44.
 \label{fig:picSearchResult2}
 \end{figure}
 
-
-Unlike \cite{sivic2003video}, this project doesn't implement the stoplist idea, which makes hard decision to remove visual words that are too common 
-in a video. A justification for this is that the notion of suppressing common visual words is already captured in a soft way by the idf weighting terms.
-One idea that we would like to explore in future work is being able to exploit the spatial consistency to further improve the performance of the Video
-Google system.
+There are some limitations with the current system compared to the one in \cite{sivic2003video}. First,
+unlike \cite{sivic2003video}, this project does not implement the stoplist idea, which makes hard decision to remove visual words that are too common 
+in a video. However, this can be justified because the notion of suppressing common visual words is already captured in a soft way by the idf 
+weighting terms. Second, the current system does not exploit the spatial consistency between the query image and the retrieved frames.
+In future work, we would like to explore this idea to further improve the performance of our Video Google system.
 
 \section{Statement of individual contribution}
 The project code and documentation repo can be accessed at the following URL \url{https://github.com/long0612/ECE549-proj}.
