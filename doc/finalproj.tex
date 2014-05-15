@@ -522,7 +522,7 @@ d(\bar{\mathbf{x}}_1, \bar{\mathbf{x}}_2) = \sqrt{(\bar{\mathbf{x}}_1  - \bar{\m
 $$
 where $\bar{\mathbf{x}}_i$ is the average descriptor of track $i$ and $\Sigma$ is the covariance matrix estimated from 
 all the tracked  average descriptors. The use of the general Mahalanobis distance instead of the common L2 distance is to (1) decorrelate
-components of the 128 dimension SIFT descriptors and (2) down-weight noisy components, i.e. components with high variance, before clustering.
+components of the 128 dimension SIFT descriptors and (2) down-weight noisy components, i.e. components with high variance, before L2 clustering.
 
 
 The K clusters form K "visual words" and effectively converted the image search problem into the well-known document search problem.

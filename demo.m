@@ -6,6 +6,7 @@
 %
 
 clear all; close all
+%run('../../vlfeat/toolbox/vl_setup')
 
 % Load visual database
 load demo.mat wFreqVec d f track SIGinv C cntVec img
@@ -14,7 +15,9 @@ K = size(wFreqVec, 2);
 
 % Ask for frame to select
 idx = input(sprintf('Please select a frame to search for (among %d frames):', nFrame));
-figure; imshow(img{idx});
+figure; 
+set(gcf, 'units','normalized', 'position', [1 0 0.5 0.5])
+imshow(img{idx});
 
 disp('Select object by specifying a rectangle')
 while 1
@@ -58,8 +61,8 @@ figure;
 set(gcf, 'units','normalized', 'position', [0 0 1 1])
 for k = 1:15
     subplot(3,5,k); imshow(img{frameIdx(k)})
-    h = vl_plotframe(f{frameIdx(k)}(:,track{frameIdx(k)}~=0));
-    set(h,'color','y','linewidth',2);
+    %h = vl_plotframe(f{frameIdx(k)}(:,track{frameIdx(k)}~=0));
+    %set(h,'color','y','linewidth',2);
     xlabel(sprintf('Relevance: %0.4f, Frame index: %d', sortScore(k), frameIdx(k)))
     %set(get(gca,'YLabel'),'Rotation',0)
 end
